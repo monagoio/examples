@@ -14,3 +14,36 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.main-background {
+  background:#fafafa;
+  min-height:800px;
+}
+.flex-center {
+    max-width: 500px;
+    display:flex;
+    flex-direction:column;
+    margin: auto;
+    background:#fff;
+    min-height:800px;
+}
+
+.navigation-menu{
+    display: flex;
+    padding: 10px 20px;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+}
+.logo-main{
+  font-size:20px;
+  font-weight:800;
+}
+
+.container {
+  padding: 10px 20px
+}
+
+.positioning{
+  justify-content: space-between;
+}
