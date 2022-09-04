@@ -1,30 +1,53 @@
 import Head from 'next/head'
 import { Box, Button, Flex, FormControl, FormLabel, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useDisclosure, VStack } from "@chakra-ui/react"
-import React from 'react'
+import React, { useEffect } from 'react'
 import { EditIcon, DeleteIcon } from '@chakra-ui/icons'
+import axios from 'axios'
+const URL = process.env.MONAGO_URL || 'https://api.monago.io/huseindra/todo-apps/v1/tasks'
 
-const Feature = ({ title, desc, ...rest }) => {
+
+const Todo = ({ title, desc, ...rest }) => {
   return (
-    <Box p={5}  borderWidth='1px' {...rest}>
-      <Flex className='positioning'>
+    <Box className='w-full' p={5}  borderWidth='1px' {...rest}>
+      <Flex className='positioning' alignItems='center'>
         <Heading fontSize='xl'>{title}</Heading>
         <div>
           <Button colorScheme='yellow'><EditIcon/></Button>
           <Button colorScheme='red'  ml='2'><DeleteIcon/></Button>
         </div>
       </Flex>
-      
-      <Text mt={2}>{desc}</Text>
     </Box>
   )
 }
 
 export default function Home() {
-
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const initialRef = React.useRef(null)
   const finalRef = React.useRef(null)
+
+
+  const fetchTodo = async () => {
+  try {
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+
+     const response = await axios.get(`${URL}/?page=1&limit=10&orderby=asc`, config)
+     console.log(response.json())
+     
+  } catch (error) {
+    console.log(error.message)
+  }
+
+}
+
+useEffect(() => {
+  fetchTodo()
+},[])
 
   return (
     <div className='main-background'>
@@ -45,13 +68,11 @@ export default function Home() {
         <div className='container'>
         <Heading fontSize='xl' mb={5}>Todo List</Heading>
         <VStack spacing={8}>
-          <Feature
+          <Todo
             title='Plan Money'
-            desc='The future can be even brighter but a goal without a plan is just a wish'
           />
-          <Feature
+          <Todo
             title='Save Money'
-            desc='You deserve good things. With a whooping 10-15% interest rate per annum, grow your savings on your own terms with our completely automated process'
           />
         </VStack>
         </div>
