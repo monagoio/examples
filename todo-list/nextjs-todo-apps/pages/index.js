@@ -1,47 +1,94 @@
 import Head from 'next/head'
-import { Box, Form, Button, Flex, FormControl, FormLabel, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useDisclosure, VStack } from "@chakra-ui/react"
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { Box, Button, Flex, FormControl, FormLabel, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useDisclosure, VStack, AlertIcon, Alert, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter } from "@chakra-ui/react"
+import React, { useRef, useState, useCallback, useEffect, Fragment } from 'react'
 import { EditIcon, DeleteIcon } from '@chakra-ui/icons'
-import axios from 'axios'
-const URL = process.env.MONAGO_URL || 'https://api.monago.io/huseindra/todoapps/v1/tasks'
 
+import { MonagoClient } from '@monagoio/monagojs'
 
 const Todo = ({ title, id, desc, open, del, ...rest }) => {
+
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const cancelRef = React.useRef()
+
   return (
-    <Box className='w-full' p={5} borderWidth='1px' {...rest}>
-      <Flex className='positioning' alignItems='center'>
-        <Text>
-          <Heading fontSize='xl'> {title} </Heading>
-          <Text fontSize="s">{desc}</Text>
-        </Text>
-        <div>
-          <Button onClick={() => open({ name: title, _id: id, description: desc, action: "update" })} colorScheme='yellow'><EditIcon /></Button>
-          <Button onClick={() => { return confirm("Are you sure delete " + title + "?") && del(id) }} colorScheme='red' ml='2'><DeleteIcon /></Button>
-        </div>
-      </Flex>
-    </Box>
+    <Fragment>
+      <AlertDialog
+        isOpen={isOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+              Delete {title}
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Are you sure delete {title}?
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose}>
+                Cancel
+              </Button>
+              <Button colorScheme='red' onClick={() => { return del(id) }} ml={3}>
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+
+      <Box className='w-full' p={5} borderWidth='1px' {...rest}>
+        <Flex className='positioning' alignItems='center'>
+          <div>
+            <Heading fontSize='xl'> {title} </Heading>
+            <Text fontSize="s">{desc}</Text>
+          </div>
+          <div>
+            <Button onClick={() => open({ name: title, _id: id, description: desc, action: "update" })} colorScheme='yellow'><EditIcon /></Button>
+            <Button onClick={onOpen} colorScheme='red' ml='2'><DeleteIcon /></Button>
+          </div>
+        </Flex>
+      </Box>
+    </Fragment>
+    
   )
 }
 
-export default function Home() {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+const SECRET_KEY = process.env.NEXT_PUBLIC_MONAGO_SECRET_KEY
 
+const client = new MonagoClient({
+  secretKey: SECRET_KEY
+})
+console.log(client.headers)
+
+export default function Home() {
+
+  const initialState = {
+    name:null,
+    description:null
+  }
+
+  const { isOpen, onOpen, onClose } = useDisclosure()
   const initialRef = useRef(null)
   const finalRef = useRef(null)
   const [tasks, setTask] = useState([])
   const [formTask, setFormTask] = useState({})
+  const [notification, setNotification] = useState(false)
+  const [notificationText, setNotificationText] = useState(initialState)
 
   const fetchTodo = useCallback(async () => {
 
     let result = []
     try {
 
-      const response = await axios.get(`${URL}?page=1&limit=10&orderby=asc`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      result = response.data.data
+      const response = await client.get({ url: "/todo", params: {
+        "page": 1,
+        "limit": 10,
+        "orderby": "desc"
+      }})
+      const result = response.data.data
 
       setTask(result)
 
@@ -53,16 +100,24 @@ export default function Home() {
 
   const createTodo = useCallback(async () => {
     try {
-
-      await axios.post(`${URL}`, formTask, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      console.log(formTask)
+      await client.post({ url: "/todo", data: {
+        name: formTask.name,
+        description: formTask.description
+      }})
 
       fetchTodo()
       setFormTask({})
       onClose()
+      setNotification(true)
+      setNotificationText({
+        name: "success",
+        description: "Add todo success"
+      })
+
+      setTimeout(() => {
+        setNotification(prev => !prev)
+      },1500)
 
     } catch (error) {
       console.log(error.message)
@@ -73,17 +128,24 @@ export default function Home() {
 
   const updateTodo = useCallback(async () => {
     try {
-      await axios.put(`${URL}/${formTask._id}`, {
-        name: formTask.name,
-        description: formTask.description
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+
+      await client.put({ url: `/todo/${formTask._id}`, data: {
+          name: formTask.name,
+          description: formTask.description
+      }})
 
       fetchTodo()
       setFormTask({})
+      setNotification(true)
+      setNotificationText({
+        name: "info",
+        description: "Update todo success"
+      })
+
+      setTimeout(() => {
+        setNotification(prev => !prev)
+      },1500)
+
       onClose()
 
     } catch (error) {
@@ -96,7 +158,7 @@ export default function Home() {
   const save = useCallback(async () => {
 
     console.log(formTask)
-    if (formTask.action == "update") {
+    if (formTask.action === "update") {
       updateTodo()
     } else {
       createTodo()
@@ -109,11 +171,17 @@ export default function Home() {
 
     try {
 
-      await axios.delete(`${URL}/${id}`, formTask, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      await client.delete({ url: `/todo/${id}` })
+
+      setNotification(true)
+      setNotificationText({
+        name: "error",
+        description: "Delete todo success"
       })
+
+      setTimeout(() => {
+        setNotification(prev => !prev)
+      },1500)
 
       fetchTodo()
 
@@ -128,8 +196,6 @@ export default function Home() {
     onOpen()
   }
 
-
-
   useEffect(() => {
     fetchTodo()
   }, [])
@@ -139,7 +205,6 @@ export default function Home() {
     [evt.target.name]: evt.target.value
   });
 
-
   return (
     <div className='main-background'>
       <Head>
@@ -148,6 +213,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Box className='flex-center'>
+         {notification && <AlertNotification status={notificationText.name} description={notificationText.description}/>}
         <nav className='navigation-menu'>
           <div className='logo-main'>
             <a>Todo</a>
@@ -162,7 +228,7 @@ export default function Home() {
             {
               tasks.map(task => {
                 return (
-                  <Todo
+                  <Todo key={task._id}
                     title={task.name}
                     desc={task.description}
                     id={task._id}
@@ -207,5 +273,14 @@ export default function Home() {
       </Modal>
     </div >
 
+  )
+}
+
+const AlertNotification = (props) => {
+  return(
+    <Alert status={`${props.status}`}>
+    <AlertIcon />
+      {props.description}
+    </Alert>
   )
 }

@@ -1658,6 +1658,13 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
+"@monagoio/monagojs@^1.0.9":
+  "integrity" "sha512-7bJbYiPf2OYNd/tHIYZCcEPcdVY5TM/0xpU3U+p/+IDJFHQOT55GE5d0TJiqecUXAfNGFTK245W9zmTlv4kMFw=="
+  "resolved" "https://registry.npmjs.org/@monagoio/monagojs/-/monagojs-1.0.9.tgz"
+  "version" "1.0.9"
+  dependencies:
+    "axios" "^0.27.2"
+
 "@motionone/animation@^10.12.0":
   "integrity" "sha512-dxQ+1wWxL6iFHDy1uv6hhcPjIdOg36eDT56jN4LI7Z5HZRyLpq8x1t7JFQclo/IEIb+6Bk4atmyinGFdXVECuA=="
   "resolved" "https://registry.npmjs.org/@motionone/animation/-/animation-10.13.1.tgz"
