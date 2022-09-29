@@ -61,7 +61,6 @@ const SECRET_KEY = process.env.NEXT_PUBLIC_MONAGO_SECRET_KEY
 const client = new MonagoClient({
   secretKey: SECRET_KEY
 })
-console.log(client.headers)
 
 export default function Home() {
 
