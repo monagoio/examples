@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { Box, Button, Flex, FormControl, FormLabel, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useDisclosure, VStack, AlertIcon, Alert, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter } from "@chakra-ui/react"
+import { Box, Button, Flex, FormControl, FormLabel, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useDisclosure, VStack, AlertIcon, Alert, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, AlertTitle, AlertDescription } from "@chakra-ui/react"
 import React, { useRef, useState, useCallback, useEffect, Fragment } from 'react'
 import { EditIcon, DeleteIcon } from '@chakra-ui/icons'
 
@@ -257,7 +257,7 @@ export default function Home() {
           <Heading fontSize='xl' mb={5}>Todo List</Heading>
           <VStack spacing={8}>
             {
-              tasks.map(task => {
+              tasks.length ? tasks.map(task => {
                 return (
                   <Todo key={task._id}
                     title={task.name}
@@ -267,7 +267,7 @@ export default function Home() {
                     open={openUpdate}
                   />
                 )
-              })
+              }): <Nodata />
             }
           </VStack>
         </div>
@@ -312,6 +312,28 @@ const AlertNotification = (props) => {
     <Alert status={`${props.status}`}>
     <AlertIcon />
       {props.description}
+    </Alert>
+  )
+}
+
+const Nodata = () => {
+  return(
+    <Alert
+      status='error'
+      variant='subtle'
+      flexDirection='column'
+      alignItems='center'
+      justifyContent='center'
+      textAlign='center'
+      height='200px'
+    >
+      <AlertIcon boxSize='40px' mr={0} />
+      <AlertTitle mt={4} mb={1} fontSize='lg'>
+        There is no task
+      </AlertTitle>
+      <AlertDescription maxWidth='sm'>
+        Please create a new task
+      </AlertDescription>
     </Alert>
   )
 }
