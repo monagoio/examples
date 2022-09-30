@@ -92,7 +92,15 @@ export default function Home() {
       setTask(result)
 
     } catch (error) {
-      console.log(error.message)
+      setNotification(true)
+      setNotificationText({
+        name: "error",
+        description: error.message
+      })
+
+      setTimeout(() => {
+        setNotification(prev => !prev)
+      },1500)
     }
     return result
   }, [tasks])
@@ -119,7 +127,15 @@ export default function Home() {
       },1500)
 
     } catch (error) {
-      console.log(error.message)
+      setNotification(true)
+      setNotificationText({
+        name: "error",
+        description: error.message
+      })
+
+      setTimeout(() => {
+        setNotification(prev => !prev)
+      },1500)
     }
   }, [formTask])
 
@@ -148,7 +164,15 @@ export default function Home() {
       onClose()
 
     } catch (error) {
-      console.log(error.message)
+      setNotification(true)
+      setNotificationText({
+        name: "error",
+        description: error.message
+      })
+
+      setTimeout(() => {
+        setNotification(prev => !prev)
+      },1500)
     }
 
   }, [formTask])
@@ -174,7 +198,7 @@ export default function Home() {
 
       setNotification(true)
       setNotificationText({
-        name: "error",
+        name: "success",
         description: "Delete todo success"
       })
 
@@ -185,7 +209,15 @@ export default function Home() {
       fetchTodo()
 
     } catch (error) {
-      console.log(error.message)
+      setNotification(true)
+      setNotificationText({
+        name: "error",
+        description: error.message
+      })
+
+      setTimeout(() => {
+        setNotification(prev => !prev)
+      },1500)
     }
 
   }, [formTask])
