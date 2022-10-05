@@ -39,6 +39,8 @@ const Todo = ({ title, id, desc, open, del, ...rest }) => {
         </AlertDialogOverlay>
       </AlertDialog>
 
+      
+
       <Box className='w-full' p={5} borderWidth='1px' {...rest}>
         <Flex className='positioning' alignItems='center'>
           <div>
